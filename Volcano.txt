@@ -1,0 +1,59 @@
+setwd("D:\\biowolf\\geoSeq\\17.volcano")
+getwd()
+
+library(ggthemes)
+library(ggplot2)
+library(ggrepel)
+library(gridExtra)
+
+Sys.setenv(LANGUAGE = "en") #
+options(stringsAsFactors = FALSE) #
+temp <- read.table("all.csv",header = T,check.names = F,quote="",sep = ",")
+head(temp)
+library(dplyr)
+p<-ggplot(temp,aes(x=temp$logFC,y=-log10(temp$PValue)))+xlab("log2 Fold Change")+ylab("-log10P-Value")+
+  
+  geom_point(size=4,alpha=0.6)
+
+p
+ggsave("volcano_0.pdf", width=6,height=5)
+dev.off()
+
+temp$threshold[temp$PValue < 0.05 & temp$logFC>0 ] = "up"
+
+temp$threshold[temp$PValue < 0.05 & temp$logFC<0 ] = "down"
+
+temp$threshold[temp$PValue > 0.05  & (temp$logFC>=0 | temp$logFC <= 0)]= "non"
+
+#temp$threshold[temp$PValue > 0.05 & (temp$logFC>=0 | temp$logFC <= 0)] = "non"
+
+p<-ggplot(temp,aes(x=temp$logFC,y=-log10(temp$PValue),colour=threshold))+xlab("log2 Fold Change")+ylab("-log10P-Value")+
+  
+  geom_point(size=2.0,alpha=0.6)+
+  
+  scale_color_manual(values =c("#0072B5","grey","#BC3C28"))  #
+
+p
+ggsave("volcano_1.pdf", width=6,height=5)
+dev.off()
+
+
+library(ggthemes)
+
+p<-ggplot(temp,aes(x=temp$logFC,y=-log10(temp$PValue),colour=threshold))+xlab("log2 Fold Change")+ylab("-log10P-Value")+
+  
+  geom_point(size=3,alpha=0.6)+
+  
+  scale_color_manual(values =c("#0072B5","grey","#BC3C28")) +
+  
+  geom_hline(aes(yintercept=-log10(0.05)),colour="grey",size=1.2 ,linetype=2) +  #
+  
+  geom_vline(aes(xintercept=0), colour="grey",size=1.2 ,linetype=2)+  #
+  
+  theme_few()+theme(legend.title = element_blank())  #
+
+p
+
+ggsave("volcano_2.pdf", width=6,height=5)
+dev.off()
+
